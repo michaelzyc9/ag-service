@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.util.Objects;
 
 @Entity
 public class FloorPlan extends AbstractEntity {
@@ -45,5 +46,15 @@ public class FloorPlan extends AbstractEntity {
 
     public void setPriceFrom(int priceFrom) {
         this.priceFrom = priceFrom;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Objects.equals(id, ((FloorPlan) obj).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

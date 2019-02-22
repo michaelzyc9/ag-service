@@ -1,6 +1,7 @@
 package com.michaelzhang.agservice.entities;
 
 import javax.persistence.Entity;
+import java.util.Objects;
 
 @Entity
 public class Address extends AbstractEntity {
@@ -49,5 +50,15 @@ public class Address extends AbstractEntity {
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return Objects.equals(id, ((Address) obj).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
