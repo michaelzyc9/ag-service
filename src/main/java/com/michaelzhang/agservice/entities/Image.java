@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Image extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "apt_id", nullable = false)
     private Apartment apartment;
     private String link;
 

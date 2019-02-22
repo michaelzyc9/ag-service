@@ -1,10 +1,8 @@
 package com.michaelzhang.agservice.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class Apartment extends AbstractEntity {
@@ -15,6 +13,10 @@ public class Apartment extends AbstractEntity {
     @JoinColumn(nullable = false)
     private Address address;
     private String website;
+    @OneToMany(mappedBy = "apartment")
+    private Set<FloorPlan> floorPlans;
+    @OneToMany(mappedBy = "apartment")
+    private Set<Image> images;
 
     public String getName() {
         return name;
@@ -38,6 +40,22 @@ public class Apartment extends AbstractEntity {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public Set<FloorPlan> getFloorPlans() {
+        return floorPlans;
+    }
+
+    public void setFloorPlans(Set<FloorPlan> floorPlans) {
+        this.floorPlans = floorPlans;
+    }
+
+    public Set<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(Set<Image> images) {
+        this.images = images;
     }
 
     @Override
