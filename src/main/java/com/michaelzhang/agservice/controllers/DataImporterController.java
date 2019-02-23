@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @RepositoryRestController
-@RequestMapping("/apartments")
+@RequestMapping("/utils")
 public class DataImporterController {
 
     @Autowired
