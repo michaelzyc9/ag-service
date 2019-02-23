@@ -58,13 +58,4 @@ public class Apartment extends AbstractEntity {
         this.images = images;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return Objects.equals(id, ((Apartment) obj).id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

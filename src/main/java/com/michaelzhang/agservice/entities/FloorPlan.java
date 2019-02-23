@@ -48,13 +48,4 @@ public class FloorPlan extends AbstractEntity {
         this.priceFrom = priceFrom;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return Objects.equals(id, ((FloorPlan) obj).id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

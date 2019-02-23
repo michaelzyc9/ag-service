@@ -13,6 +13,7 @@ public class Image extends AbstractEntity {
     @JoinColumn(name = "apt_id", nullable = false)
     private Apartment apartment;
     private String link;
+    private String description;
 
     public Apartment getApartment() {
         return apartment;
@@ -30,13 +31,11 @@ public class Image extends AbstractEntity {
         this.link = link;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return Objects.equals(id, ((Image) obj).id);
+    public String getDescription() {
+        return description;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

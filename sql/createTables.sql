@@ -43,6 +43,7 @@ CREATE TABLE image
   id				int NOT NULL AUTO_INCREMENT,
   apt_id			int,
   link				varchar(256),
+  description       varchar(256),
   created 			TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
   PRIMARY KEY (id),
   FOREIGN KEY (apt_id) REFERENCES apartment(id)

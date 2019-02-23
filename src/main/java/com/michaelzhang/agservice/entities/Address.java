@@ -52,13 +52,4 @@ public class Address extends AbstractEntity {
         this.zipCode = zipCode;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return Objects.equals(id, ((Address) obj).id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }
