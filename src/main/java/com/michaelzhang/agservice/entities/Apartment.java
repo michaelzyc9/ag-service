@@ -1,5 +1,7 @@
 package com.michaelzhang.agservice.entities;
 
+import org.springframework.data.rest.core.annotation.RestResource;
+
 import javax.persistence.*;
 import java.util.Objects;
 import java.util.Set;
@@ -10,11 +12,14 @@ public class Apartment extends AbstractEntity {
     private String name;
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
+    @RestResource(exported = false)
     private Address address;
     private String website;
     @OneToMany(mappedBy = "apartment")
+    @RestResource(exported = false)
     private Set<FloorPlan> floorPlans;
     @OneToMany(mappedBy = "apartment")
+    @RestResource(exported = false)
     private Set<Image> images;
 
     public String getName() {

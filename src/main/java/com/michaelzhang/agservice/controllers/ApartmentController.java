@@ -5,6 +5,7 @@ import com.michaelzhang.agservice.entities.Apartment;
 import com.michaelzhang.agservice.repos.AddressRepository;
 import com.michaelzhang.agservice.repos.ApartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
@@ -28,7 +29,8 @@ public class ApartmentController {
     private AddressRepository addressRepository;
 
     @GetMapping("/search")
-    public @ResponseBody ResponseEntity getApartmentsByZipCode(@RequestParam("zipCode") String zipCode) {
+    public @ResponseBody ResponseEntity getApartmentsByZipCode(@RequestParam("zipCode") String zipCode,
+                                                               PersistentEntityResourceAssembler assembler) {
         List<Address> addresses = addressRepository.findByZipCode(zipCode);
         List<Long> addressIds = new ArrayList<>();
         for (Address address : addresses) {
@@ -37,14 +39,7 @@ public class ApartmentController {
         List<Apartment> apartments = apartmentRepository.findByAddressIdIn(addressIds);
         List<Resource> resourceList = new ArrayList<>();
         for(Apartment apt : apartments){
-            Resource<Apartment> newResource = new Resource<>(apt);
-
-            newResource.add(linkTo(methodOn(ApartmentController.class).getApartmentsByZipCode(zipCode)).withSelfRel());
-            newResource.add(linkTo(ApartmentController.class).slash(apt.getId()).slash("address").withRel("address"));
-            newResource.add(linkTo(ApartmentController.class).slash(apt.getId()).slash("images").withRel("images"));
-            newResource.add(linkTo(ApartmentController.class).slash(apt.getId()).slash("floorPlans").withRel("floorPlans"));
-
-            resourceList.add(newResource);
+            resourceList.add(assembler.toResource(apt));
         }
         Resources<Resource<Apartment>> resources = new Resources(resourceList);
         return ResponseEntity.ok(resources);
