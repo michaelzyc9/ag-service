@@ -29,19 +29,22 @@ public class ApartmentController {
     private AddressRepository addressRepository;
 
     @GetMapping("/search")
-    public @ResponseBody ResponseEntity getApartmentsByZipCode(@RequestParam("zipCode") String zipCode,
-                                                               PersistentEntityResourceAssembler assembler) {
+    public @ResponseBody
+    ResponseEntity getApartmentsByZipCode(@RequestParam("zipCode") String zipCode,
+                                          PersistentEntityResourceAssembler assembler) {
+        List<Apartment> apartments = getApartmentsByZipCode(zipCode);
+        Resources<Resource<Apartment>> resources = new Resources(apartments);
+        return ResponseEntity.ok(resources);
+    }
+
+
+    private List<Apartment> getApartmentsByZipCode(String zipCode) {
         List<Address> addresses = addressRepository.findByZipCode(zipCode);
         List<Long> addressIds = new ArrayList<>();
         for (Address address : addresses) {
             addressIds.add(address.getId());
         }
         List<Apartment> apartments = apartmentRepository.findByAddressIdIn(addressIds);
-        List<Resource> resourceList = new ArrayList<>();
-        for(Apartment apt : apartments){
-            resourceList.add(assembler.toResource(apt));
-        }
-        Resources<Resource<Apartment>> resources = new Resources(resourceList);
-        return ResponseEntity.ok(resources);
+        return apartments;
     }
 }
