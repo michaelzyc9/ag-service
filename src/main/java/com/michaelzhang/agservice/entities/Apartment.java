@@ -8,7 +8,6 @@ import java.util.Set;
 public class Apartment extends AbstractEntity {
 
     private String name;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(nullable = false)
     private Address address;
@@ -56,6 +55,10 @@ public class Apartment extends AbstractEntity {
 
     public void setImages(Set<Image> images) {
         this.images = images;
+    }
+
+    public Long getResourceId() {
+        return id;
     }
 
 }
