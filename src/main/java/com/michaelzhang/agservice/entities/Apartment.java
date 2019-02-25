@@ -62,8 +62,4 @@ public class Apartment extends AbstractEntity {
         this.images = images;
     }
 
-    public Long getResourceId() {
-        return id;
-    }
-
 }

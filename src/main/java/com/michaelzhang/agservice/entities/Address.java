@@ -52,4 +52,13 @@ public class Address extends AbstractEntity {
         this.zipCode = zipCode;
     }
 
+    public String getFullAddress(){
+        String fullAddress = streetNumber + " " +
+                            street + ", " +
+                            city + ", " +
+                            state + " " +
+                            zipCode;
+        return fullAddress;
+    }
+
 }
