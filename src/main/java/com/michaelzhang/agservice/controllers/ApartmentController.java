@@ -34,6 +34,16 @@ public class ApartmentController {
         return ResponseEntity.ok(resources);
     }
 
+    @GetMapping("/{id}")
+    public @ResponseBody
+    ResponseEntity getApartmentById(@PathVariable("id") Long id) {
+        List<Long> idParam  = new ArrayList<>();
+        idParam.add(id);
+        List<ApartmentProjection> result = apartmentRepository.findByIdIn(idParam);
+        Resources<Resource<ApartmentProjection>> resources = new Resources(result);
+        return ResponseEntity.ok(resources);
+    }
+
     private List<ApartmentProjection> getApartmentsByZipCode(String zipCode) {
         List<Address> addresses = addressRepository.findByZipCode(zipCode);
         List<Long> addressIds = new ArrayList<>();

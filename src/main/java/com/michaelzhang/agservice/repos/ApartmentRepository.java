@@ -16,4 +16,7 @@ public interface ApartmentRepository extends PagingAndSortingRepository<Apartmen
 
     List<ApartmentProjection> findByAddressIdIn(List<Long> addressIds);
 
+    List<ApartmentProjection> findByIdIn(List<Long> ids);
+
+
 }
