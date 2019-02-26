@@ -1,0 +1,1 @@
+java -jar "./ag-service-0.0.1-SNAPSHOT"
