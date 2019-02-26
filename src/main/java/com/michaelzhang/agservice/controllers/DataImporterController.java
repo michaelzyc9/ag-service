@@ -12,6 +12,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +41,18 @@ public class DataImporterController {
     @Autowired
     private FloorPlanRepository floorPlanRepository;
 
+    @Value("${utils.import.key}")
+    private String key;
+
     @PostMapping("/import")
-    public ResponseEntity importData(@RequestParam("url") String url) throws IOException, JSONException {
+    @RestResource(exported = false)
+    public ResponseEntity importData(@RequestParam("url") String url,
+                                     @RequestParam("key") String inputKey) throws IOException, JSONException {
+        if (inputKey == null || !inputKey.equals(key))
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("INCORRECT KEY");
+
         InputStream is = new URL(url).openStream();
         int dataCount = 0;
         try {
