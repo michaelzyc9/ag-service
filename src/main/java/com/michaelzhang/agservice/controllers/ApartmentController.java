@@ -36,41 +36,42 @@ public class ApartmentController {
                                  @RequestParam(value = "maxPrice", required = false) Integer maxPrice,
                                  @RequestParam(value = "name", required = false) String name) {
 
-        List<ApartmentProjection> result = null;
+        List<Long> aptIds = null;
 
-        List<ApartmentProjection> apartmentsByZipCode;
+        List<Long> aptIdsByZipCode;
         if (zipCode != null && !zipCode.isEmpty()) {
-            apartmentsByZipCode = getApartmentsByZipCode(zipCode);
-            result = apartmentsByZipCode;
+            aptIdsByZipCode = getAptIdByZipCode(zipCode);
+            aptIds = aptIdsByZipCode;
         }
 
-        List<ApartmentProjection> apartmentsByBedNum;
+        List<Long> aptIdsByBedNum;
         if (bedNum != null && !bedNum.isEmpty()) {
-            apartmentsByBedNum = getApartmentsByBedNum(bedNum);
-            if (result == null)
-                result = apartmentsByBedNum;
+            aptIdsByBedNum = getAptIdsByBedNum(bedNum);
+            if (aptIds == null)
+                aptIds = aptIdsByBedNum;
             else
-                result = getIntersection(result, apartmentsByBedNum);
+                aptIds = getIntersection(aptIds, aptIdsByBedNum);
         }
 
-        List<ApartmentProjection> apartmentsByMaxPrice;
+        List<Long> aptIdsByMaxPrice;
         if (maxPrice != null) {
-            apartmentsByMaxPrice = getApartmentsByMaxPrice(maxPrice);
-            if (result == null)
-                result = apartmentsByMaxPrice;
+            aptIdsByMaxPrice = getAptIdsByMaxPrice(maxPrice);
+            if (aptIds == null)
+                aptIds = aptIdsByMaxPrice;
             else
-                result = getIntersection(result, apartmentsByMaxPrice);
+                aptIds = getIntersection(aptIds, aptIdsByMaxPrice);
         }
 
-        List<ApartmentProjection> apartmentsByName;
+        List<Long> aptIdsByName;
         if (name != null && !name.isEmpty()) {
-            apartmentsByName = getApartmentsByName(name);
-            if (result == null)
-                result = apartmentsByName;
+            aptIdsByName = getAptIdsByName(name);
+            if (aptIds == null)
+                aptIds = aptIdsByName;
             else
-                result = getIntersection(result, apartmentsByName);
+                aptIds = getIntersection(aptIds, aptIdsByName);
         }
 
+        List<ApartmentProjection> result = apartmentRepository.findByIdIn(aptIds);
         Resources<Resource<ApartmentProjection>> resources = new Resources(result);
         return ResponseEntity.ok(resources);
     }
@@ -85,47 +86,52 @@ public class ApartmentController {
         return ResponseEntity.ok(resources);
     }
 
-    private List<ApartmentProjection> getApartmentsByZipCode(String zipCode) {
-        if (zipCode == null || zipCode.isEmpty())
-            return null;
-
+    private List<Long> getAptIdByZipCode(String zipCode) {
         List<Address> addresses = addressRepository.findByZipCode(zipCode);
         List<Long> addressIds = new ArrayList<>();
         for (Address address : addresses) {
             addressIds.add(address.getId());
         }
-        List<ApartmentProjection> apartments = apartmentRepository.findByAddressIdIn(addressIds);
-        return apartments;
+        List<Apartment> apartments = apartmentRepository.findByAddressIdIn(addressIds);
+        List<Long> aptIds = new ArrayList<>();
+        for (Apartment apt : apartments) {
+            aptIds.add(apt.getId());
+        }
+        return aptIds;
     }
 
-    private List<ApartmentProjection> getApartmentsByName(String name) {
-        return apartmentRepository.findByNameIgnoreCaseContaining(name);
+    private List<Long> getAptIdsByName(String name) {
+        List<Apartment> apartments = apartmentRepository.findByNameIgnoreCaseContaining(name);
+        List<Long> aptIds = new ArrayList<>();
+        for (Apartment apt : apartments) {
+            aptIds.add(apt.getId());
+        }
+        return aptIds;
     }
 
-    private List<ApartmentProjection> getApartmentsByMaxPrice(Integer maxPrice) {
+    private List<Long> getAptIdsByMaxPrice(Integer maxPrice) {
         List<FloorPlan> fpList = floorPlanRepository.findByPriceFromLessThan(maxPrice);
         Set<Long> aptIdSet = new HashSet();
         for (FloorPlan fp : fpList) {
             aptIdSet.add(fp.getApartment().getId());
         }
-        List<Long> idList = new ArrayList<>(aptIdSet);
-        List<ApartmentProjection> results = apartmentRepository.findByIdIn(idList);
-        return results;
+        List<Long> aptIds = new ArrayList<>(aptIdSet);
+        return aptIds;
     }
 
-    private List<ApartmentProjection> getApartmentsByBedNum(String bedNum) {
+    private List<Long> getAptIdsByBedNum(String bedNum) {
         List<FloorPlan> fpList = floorPlanRepository.findByBed(Float.valueOf(bedNum));
         Set<Long> aptIdSet = new HashSet();
         for (FloorPlan fp : fpList) {
             aptIdSet.add(fp.getApartment().getId());
         }
-        List<Long> idList = new ArrayList<>(aptIdSet);
-        List<ApartmentProjection> results = apartmentRepository.findByIdIn(idList);
-        return results;
+        List<Long> aptIds = new ArrayList<>(aptIdSet);
+        return aptIds;
     }
 
-    private List<ApartmentProjection> getIntersection(List<ApartmentProjection> l1, List<ApartmentProjection> l2) {
-        return null;
+    private List<Long> getIntersection(List<Long> l1, List<Long> l2) {
+        l1.retainAll(l2);
+        return l1;
     }
 
 

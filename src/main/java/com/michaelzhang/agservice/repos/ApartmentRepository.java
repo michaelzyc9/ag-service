@@ -14,10 +14,10 @@ import java.util.List;
 @RepositoryRestResource(excerptProjection= ApartmentProjection.class)
 public interface ApartmentRepository extends PagingAndSortingRepository<Apartment, Long> {
 
-    List<ApartmentProjection> findByAddressIdIn(List<Long> addressIds);
+    List<Apartment> findByAddressIdIn(List<Long> addressIds);
 
     List<ApartmentProjection> findByIdIn(List<Long> ids);
 
-    List<ApartmentProjection> findByNameIgnoreCaseContaining(String name);
+    List<Apartment> findByNameIgnoreCaseContaining(String name);
 
 }
