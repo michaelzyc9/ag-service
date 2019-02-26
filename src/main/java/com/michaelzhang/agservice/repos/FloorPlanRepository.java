@@ -9,8 +9,16 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
+import java.util.List;
+
 @RepositoryRestResource(excerptProjection= FloorPlanProjection.class)
 public interface FloorPlanRepository extends PagingAndSortingRepository<FloorPlan, Long> {
+
+    @RestResource(exported = false)
+    List<FloorPlan> findByPriceFromLessThan(Integer maxPrice);
+
+    @RestResource(exported = false)
+    List<FloorPlan> findByBed(float bed);
 
     @Override
     @RestResource(exported = false)

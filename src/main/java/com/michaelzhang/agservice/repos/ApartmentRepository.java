@@ -18,5 +18,6 @@ public interface ApartmentRepository extends PagingAndSortingRepository<Apartmen
 
     List<ApartmentProjection> findByIdIn(List<Long> ids);
 
+    List<ApartmentProjection> findByNameIgnoreCaseContaining(String name);
 
 }
