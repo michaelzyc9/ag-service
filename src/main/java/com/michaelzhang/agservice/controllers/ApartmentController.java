@@ -19,10 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
-
 @RepositoryRestController
 @RequestMapping("/apartments")
 public class ApartmentController {
@@ -79,7 +75,6 @@ public class ApartmentController {
         return ResponseEntity.ok(resources);
     }
 
-
     @GetMapping("/{id}")
     public @ResponseBody
     ResponseEntity getApartmentById(@PathVariable("id") Long id) {
@@ -128,7 +123,6 @@ public class ApartmentController {
         List<ApartmentProjection> results = apartmentRepository.findByIdIn(idList);
         return results;
     }
-
 
     private List<ApartmentProjection> getIntersection(List<ApartmentProjection> l1, List<ApartmentProjection> l2) {
         return null;
