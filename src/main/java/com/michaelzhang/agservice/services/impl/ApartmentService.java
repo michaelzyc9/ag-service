@@ -1,57 +1,97 @@
-package com.michaelzhang.agservice.controllers;
+package com.michaelzhang.agservice.services.impl;
 
 import com.michaelzhang.agservice.entities.Address;
 import com.michaelzhang.agservice.entities.Apartment;
 import com.michaelzhang.agservice.entities.FloorPlan;
 import com.michaelzhang.agservice.entities.Image;
+import com.michaelzhang.agservice.projections.ApartmentProjection;
 import com.michaelzhang.agservice.repos.AddressRepository;
 import com.michaelzhang.agservice.repos.ApartmentRepository;
 import com.michaelzhang.agservice.repos.FloorPlanRepository;
 import com.michaelzhang.agservice.repos.ImageRepository;
+import com.michaelzhang.agservice.services.IApartmentService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.rest.core.annotation.RestResource;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-@RepositoryRestController
-@RequestMapping("/utils")
-public class DataImporterController {
+@Service
+public class ApartmentService implements IApartmentService {
 
     @Autowired
     private ApartmentRepository apartmentRepository;
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
-    private ImageRepository imageRepository;
-    @Autowired
     private FloorPlanRepository floorPlanRepository;
-
+    @Autowired
+    private ImageRepository imageRepository;
     @Value("${utils.import.key}")
     private String key;
 
-    @PostMapping("/import")
-    @RestResource(exported = false)
-    public ResponseEntity importData(@RequestParam("url") String url,
-                                     @RequestParam("key") String inputKey) throws IOException, JSONException {
+    @Override
+    public List<ApartmentProjection> getApartmentsByFilter(String zipCode, String bedNum, Integer maxPrice, String name) {
+        List<Long> aptIds = null;
+
+        List<Long> aptIdsByZipCode;
+        if (zipCode != null && !zipCode.isEmpty()) {
+            aptIdsByZipCode = getAptIdByZipCode(zipCode);
+            aptIds = aptIdsByZipCode;
+        }
+
+        List<Long> aptIdsByBedNum;
+        if (bedNum != null && !bedNum.isEmpty()) {
+            aptIdsByBedNum = getAptIdsByBedNum(bedNum);
+            if (aptIds == null)
+                aptIds = aptIdsByBedNum;
+            else
+                aptIds = getIntersection(aptIds, aptIdsByBedNum);
+        }
+
+        List<Long> aptIdsByMaxPrice;
+        if (maxPrice != null) {
+            aptIdsByMaxPrice = getAptIdsByMaxPrice(maxPrice);
+            if (aptIds == null)
+                aptIds = aptIdsByMaxPrice;
+            else
+                aptIds = getIntersection(aptIds, aptIdsByMaxPrice);
+        }
+
+        List<Long> aptIdsByName;
+        if (name != null && !name.isEmpty()) {
+            aptIdsByName = getAptIdsByName(name);
+            if (aptIds == null)
+                aptIds = aptIdsByName;
+            else
+                aptIds = getIntersection(aptIds, aptIdsByName);
+        }
+
+        List<ApartmentProjection> result = apartmentRepository.findByIdIn(aptIds);
+        return result;
+    }
+
+    @Override
+    public List<ApartmentProjection> getApartmentsById(Long id) {
+        List<Long> idParam = new ArrayList<>();
+        idParam.add(id);
+        List<ApartmentProjection> result = apartmentRepository.findByIdIn(idParam);
+        return result;
+    }
+
+    @Override
+    public int importDataFromJson(String url, String inputKey) throws IOException, JSONException {
         if (inputKey == null || !inputKey.equals(key))
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body("INCORRECT KEY");
+            return -1;
 
         InputStream is = new URL(url).openStream();
         int dataCount = 0;
@@ -87,9 +127,55 @@ public class DataImporterController {
         } finally {
             is.close();
         }
+        return dataCount;
+    }
 
-        return ResponseEntity.ok(dataCount + " Apartment records created");
+    private List<Long> getAptIdByZipCode(String zipCode) {
+        List<Address> addresses = addressRepository.findByZipCode(zipCode);
+        List<Long> addressIds = new ArrayList<>();
+        for (Address address : addresses) {
+            addressIds.add(address.getId());
+        }
+        List<Apartment> apartments = apartmentRepository.findByAddressIdIn(addressIds);
+        List<Long> aptIds = new ArrayList<>();
+        for (Apartment apt : apartments) {
+            aptIds.add(apt.getId());
+        }
+        return aptIds;
+    }
 
+    private List<Long> getAptIdsByName(String name) {
+        List<Apartment> apartments = apartmentRepository.findByNameIgnoreCaseContaining(name);
+        List<Long> aptIds = new ArrayList<>();
+        for (Apartment apt : apartments) {
+            aptIds.add(apt.getId());
+        }
+        return aptIds;
+    }
+
+    private List<Long> getAptIdsByMaxPrice(Integer maxPrice) {
+        List<FloorPlan> fpList = floorPlanRepository.findByPriceFromLessThan(maxPrice);
+        Set<Long> aptIdSet = new HashSet();
+        for (FloorPlan fp : fpList) {
+            aptIdSet.add(fp.getApartment().getId());
+        }
+        List<Long> aptIds = new ArrayList<>(aptIdSet);
+        return aptIds;
+    }
+
+    private List<Long> getAptIdsByBedNum(String bedNum) {
+        List<FloorPlan> fpList = floorPlanRepository.findByBed(Float.valueOf(bedNum));
+        Set<Long> aptIdSet = new HashSet();
+        for (FloorPlan fp : fpList) {
+            aptIdSet.add(fp.getApartment().getId());
+        }
+        List<Long> aptIds = new ArrayList<>(aptIdSet);
+        return aptIds;
+    }
+
+    private List<Long> getIntersection(List<Long> l1, List<Long> l2) {
+        l1.retainAll(l2);
+        return l1;
     }
 
     private Address importAddress(String address) {
